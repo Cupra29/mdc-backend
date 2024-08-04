@@ -14,7 +14,7 @@ export class UsersService {
 
   // Define un metodo para obtener un usuario por su id
   async getUserById(id: string): Promise<User> {
-    // Encuentra un usuario por su id    find((user) => user.id === id);
+    // Encuentra un usuario por su id
     const userFound = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -35,7 +35,7 @@ export class UsersService {
     try {
       return this.prisma.user.update({ where: { id }, data });
     } catch (error) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(`User with id: ${id} not found`);
     }
   }
 
