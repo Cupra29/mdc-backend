@@ -3,15 +3,12 @@ import {
   Get,
   Post,
   Put,
-  Patch,
   Delete,
   Body,
-  Query,
   Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UpdateUserDto } from './dto/updateUser.dto';
+import { User } from '@prisma/client';
 
 @Controller('/users')
 export class UsersController {
@@ -22,42 +19,34 @@ export class UsersController {
 
   // Define a route handler to get all users
   @Get()
-  getAllUsers(@Query() query: any) {
-    console.log(query);
+  async getAllUsers() {
     return this.usersService.getAllUsers();
   }
 
   // Define a route handler to get a user
   @Get('/:id')
   // @Param() decorator to extract the parameter from the request
-  getUser(@Param('id') id: string) {
-    console.log(id);
-    return this.usersService.getUser(parseInt(id));
+  async getUserById(@Param('id') id: string) {
+    return this.usersService.getUserById(id);
   }
 
   // Define a route handler to create a user
   @Post()
   // @UsePipes(new ValidationPipe()) ----> Ya no se usara pero si quisieramos validacion para cada campo asi se haria
   // @Body() decorator to extract the body of the request
-  createUser(@Body() user: CreateUserDto) {
-    return this.usersService.createUser(user);
+  async createUser(@Body() data: User) {
+    return this.usersService.createUser(data);
   }
 
   // Define a route handler to update a user
-  @Put()
-  updateUser(@Body() user: UpdateUserDto) {
-    return this.usersService.updateUser(user);
+  @Put('/:id')
+  async updateUser(@Param('id') id: string, @Body() data: User) {
+    return this.usersService.updateUser(id, data);
   }
 
   // Define a route handler to delete a user
-  @Delete()
-  deleteUser() {
-    return this.usersService.deleteUser();
-  }
-
-  // Define a route handler to update a user's status
-  @Patch()
-  updateUserStatus() {
-    return this.usersService.updateUserStatus();
+  @Delete('/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
   }
 }

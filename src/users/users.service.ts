@@ -1,50 +1,52 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UpdateUserDto } from './dto/updateUser.dto';
+import { PrismaService } from 'src/prisma.service';
+import { User } from '.prisma/client';
 
 @Injectable()
 export class UsersService {
-  private users = [];
+  // Genera un constructor para inyectar el servicio de Prisma
+  constructor(private prisma: PrismaService) {}
 
-  // Define a method to get all users
-  getAllUsers() {
-    return this.users;
+  // Define un metodo para obtener todos los usuarios
+  async getAllUsers(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
 
-  // Define a method to get a user
-  getUser(id: number) {
-    // find the user with the given id
-    const userFound = this.users.find((user) => user.id === id);
+  // Define un metodo para obtener un usuario por su id
+  async getUserById(id: string): Promise<User> {
+    // Encuentra un usuario por su id    find((user) => user.id === id);
+    const userFound = await this.prisma.user.findUnique({
+      where: { id },
+    });
 
     if (!userFound) {
-      return new NotFoundException(`User with ${id} not found`);
+      throw new NotFoundException(`User with ${id} not found`);
     }
     return userFound;
   }
 
-  // Define a method to create a user
-  createUser(user: CreateUserDto) {
-    this.users.push({
-      id: this.users.length + 1,
-      // spread operator to merge the user object with the id
-      ...user,
-    });
-    return user;
+  // Define un metodo para crear un usuario
+  async createUser(data: User): Promise<User> {
+    return this.prisma.user.create({ data });
   }
 
-  // Define a method to update a user
-  updateUser(user: UpdateUserDto) {
-    console.log(user.name);
-    return 'Actualizando usuario';
+  // Define un metodo para actualizar un usuario
+  async updateUser(id: string, data: User): Promise<User> {
+    try {
+      return this.prisma.user.update({ where: { id }, data });
+    } catch (error) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
   }
 
-  // Define a method to delete a user
-  deleteUser() {
-    return 'Eliminando usuario';
-  }
-
-  // Define a method to update a user's status
-  updateUserStatus() {
-    return 'Actualizando estado del usuario';
+  // Define un metodo para eliminar un usuario
+  async deleteUser(id: string): Promise<User> {
+    // Ejecuta un bloque try/catch para manejar errores
+    try {
+      // Elimina un usuario por su id
+      return await this.prisma.user.delete({ where: { id } });
+    } catch (error) {
+      throw new NotFoundException(`User whit id ${id} not found`);
+    }
   }
 }
